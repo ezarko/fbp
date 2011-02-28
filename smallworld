@@ -1,0 +1,33 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my @f = ();
+while(<>) {
+	my($r,$lat,$long) = split;
+	--$r;
+	$f[$r] = [$lat,$long,[]];
+	for (my $l=0; $l < $r; ++$l) {
+		# technically this should be sqrooted, but it doesn't matter because the proportion will be the same
+		my $d = ($f[$l][0]-$f[$r][0])**2+($f[$l][1]-$f[$r][1])**2;
+		if ($r < 4) {
+			$f[$l][2] = [sort {$a->[0] <=> $b->[0]} @{$f[$l][2]}, [$d,$r]];
+			$f[$r][2] = [sort {$a->[0] <=> $b->[0]} @{$f[$r][2]}, [$d,$l]];
+		} else {
+			if ($d < $f[$l][2][2][0]) {
+				$f[$l][2] = [sort {$a->[0] <=> $b->[0]} @{$f[$l][2]}, [$d,$r]];
+				pop(@{$f[$l][2]});
+			}
+			if ($l < 3) {
+				$f[$r][2] = [sort {$a->[0] <=> $b->[0]} @{$f[$r][2]}, [$d,$l]];
+			} elsif ($d < $f[$r][2][2][0]) {
+				$f[$r][2] = [sort {$a->[0] <=> $b->[0]} @{$f[$r][2]}, [$d,$l]];
+				pop(@{$f[$r][2]});
+			}
+		}
+	}
+}
+for (my $i = 0; $i < @f; ++$i) {
+	printf "%d %d,%d,%d\n", ($i+1), map {1+$_->[1]} @{$f[$i][2]};
+}

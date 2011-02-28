@@ -1,0 +1,30 @@
+Thrift Ruby Software Library
+    by Kevin Ballard, Kevin Clark, Mark Slee
+    http://incubator.apache.org/thrift/
+
+== DESCRIPTION:
+
+Thrift is a strongly-typed language-agnostic RPC system.
+This library is the ruby implementation for both clients and servers.
+
+== INSTALL:
+
+  $ gem install thrift
+
+== CAVEATS:
+
+This library provides the client and server implementations of thrift.
+It does <em>not</em> provide the compiler for the .thrift files. To compile
+.thrift files into language-specific implementations, please download the full
+thrift software package.
+
+== USAGE:
+
+This section should get written by someone with the time and inclination.
+In the meantime, look at existing code, such as the benchmark or the tutorial
+in the full thrift distribution.
+
+== LICENSE:
+
+Thrift is distributed under the Apache Software License.
+Please see the included LICENSE file.

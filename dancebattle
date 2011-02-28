@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $n = <>;
+my %open = ();
+for (my $a = 0; $a < $n; ++$a) {
+	for (my $b = 0; $b < $n; ++$b) {
+		$open{$a}{$b} = 1;
+	}
+}
+my $m = <>;
+my $l;
+while(<>) {
+	last unless $m;
+	--$m;
+	my($a,$b) = split;
+	delete $open{$a}{$b};
+	delete $open{$b}{$a};
+	$l = $b;
+}
+sub find_next {
+	my($l,$t) = @_;
+	for my $n (keys %{$open{$l}}) {
+		delete $open{$l}{$n};
+		delete $open{$n}{$l};
+		my($w) = find_next($n,!$t);
+		$open{$l}{$n} = $open{$n}{$l} = 1;
+		if ($t) {
+			return 1 if $w;
+		} else {
+			return 0 unless $w;
+		}
+	}
+	return !$t;
+}
+my $win = find_next($l,1);
+print $win ? "Win\n" : "Lose\n";

@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+
+my $mw = <>;
+my @d = ();
+while (<>) {
+	my($sku,$w,$p) = split;
+	push @d, $w, $p;
+}
+
+sub p {
+	my($w, $i) = @_;
+	return if $i > $#d;
+	my $c = int($w/$d[$i])+(($w%$d[$i])?1:0);
+	my @r = ($c*$d[$i],$c*$d[$i+1]);
+	while ($c-- > 0) {
+		my($dw,$dp) = p($w-$c*$d[$i], $i+2);
+		$dw += $c*$d[$i];
+		$dp += $c*$d[$i+1];
+		@r = ($dw,$dp) if ($dw >= $w && $dp < $r[1]);
+	}
+	return wantarray() ? @r : pop @r;
+}
+print p($mw,0)."\n";

@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+
+my $n = <>;
+#print $n;
+for(1..(($n/80)+(($n%80)&&1))) {
+	$_ = <>; # probably should save this, but the puzzle doesn't require it ;)
+}
+my $g = <>;
+#print $g;
+my @p = ();
+for(1..$g) {
+	$_ = <>;
+	my($start,$stop,$score) = split;
+	$p[$start] = [] unless $p[$start];
+	push @{$p[$start]}, [$stop,$score];
+}
+#use Data::Dumper;print Dumper(\@p);
+#my $l = 0;
+sub f {
+	my($start) = @_;
+	my @r = (0);
+	while($start < $n) {
+		if ($p[$start]) {
+			for (@{$p[$start]}) {
+				my($stop,$score) = @$_;
+#print " "x$l,"$start $stop $score\n";
+#$l+=4;
+				push @r, map {$score+$_} f($stop+1);
+#$l-=4;
+			}
+		}
+		++$start;
+	}
+	@r = sort {$a <=> $b} @r;
+#print " "x$l,"@r\n";
+	return pop @r;
+}
+print f(0)."\n";

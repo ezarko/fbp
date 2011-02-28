@@ -1,0 +1,101 @@
+#!/usr/bin/expect
+
+set host mx.sf2p.tfbnw.net
+set infile [lindex $argv 0]
+set timeout [lindex $argv 1]
+
+if 0==$argc {
+	send_user "submit: usage: submit <input_file> \[timeout\]\n"
+	send_user "\nWhere <input_file> is a mail message to send, and\n"
+	send_user "\[timeout\] is an optional timeout value, in seconds.\n"
+	exit 1
+}
+
+# Set the optional timeout value, in seconds.  Default is 30 seconds.
+if {![string compare $timeo ""]} {
+	set timeout 30
+} else {
+	set timeout $timeo
+}
+
+# See if we can open the input file
+if [catch {open $infile} fh] {
+	puts "$fh"
+	exit 1
+}
+
+send_user "submit $host: beginning...\n"
+
+spawn telnet $host 25
+expect "2?: *" {
+	send_user "submit $host: connect failed\n"
+	exit 1
+} "2?? *" {
+	send_user "submit $host: connect OK\n"
+} "refused" {
+	send_user "submit $host: connect refused\n"
+	exit 1
+} "closed" {
+	send_user "submit $host: connect closed\n"
+	exit 1
+} timeout {
+	send_user "submit $host: connect to port 25 timeout\n"
+	exit 1
+}
+
+#send_user "submit $host: $expect_out(0,string)\n"
+
+send "HELO $host\n"
+expect "Hello" {
+	send_user "submit $host: helo OK\n"
+} "5??" {
+	send_user "submit $host: helo FAILED\n"
+	exit 1
+} timeout {
+	send_user "submit $host: helo timeout\n"
+	exit 1
+}
+
+send "MAIL FROM:<eric@zarko.org>\n"
+expect "2?? " {
+	send "RCPT TO:<1051962371@facebook.com>\n"
+	expect "2?? " {
+		send "DATA\n"
+		expect "3?? " {
+			while {[gets $fh line] != -1} {
+				send "$line\n"
+			}
+			send ".\n"
+			expect "2?? " {
+				send_user "submit $host: data completed.\n"
+			} "5??" {
+				send_user "submit $host: data complete failed\n"
+			} timeout {
+				send_user "submit $host: data complete timeout\n"
+				exit 1
+			}
+		} "5??" {
+			send_user "submit $host: data start failed\n"
+		} timeout {
+			send_user "submit $host: data start timeout\n"
+			exit 1
+		}
+	} "5??" {
+		send_user "submit $host: rcpt to failed\n"
+	} timeout {
+		send_user "submit $host: rcpt to timeout\n"
+		exit 1
+	}
+} "5??" {
+	send_user "submit $host: mail from failed\n"
+} timeout {
+	send_user "submit $host: mail from timeout\n"
+	exit 1
+}
+
+send "quit\n"
+send_user "submit $host: completed.\n\n"
+
+close $fh
+
+exit

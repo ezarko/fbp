@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+use lib 'rushhour-perl';
+
+use Data::Dumper;
+use Thrift;
+use Thrift::BinaryProtocol;
+use Thrift::Socket;
+use Thrift::BufferedTransport;
+
+use RushHour;
+use Types;
+use Constants;
+
+my $socket    = new Thrift::Socket('thriftpuzzle.facebook.com',9032,sub{warn @_;});
+my $transport = new Thrift::BufferedTransport($socket,1024,1024);
+my $protocol  = new Thrift::BinaryProtocol($transport);
+my $client    = new RushHourClient($protocol);
+
+eval {
+	$socket->setSendTimeout(1000);
+	$socket->setRecvTimeout(5000);
+	$socket->setDebug(1);
+	$transport->open();
+
+print "registering\n";
+	$client->registerClient('ezarko2010@gmail.com','eric at zarko dot org') || die "R:$@";
+
+	my $map = $client->getRoadConditions();
+print Dumper($map);
+
+	#print $client->winGame();
+
+	$transport->close();
+}; if($@){
+    warn(Dumper($@));
+}
